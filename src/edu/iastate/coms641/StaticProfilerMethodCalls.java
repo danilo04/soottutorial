@@ -16,13 +16,12 @@ import soot.jimple.Stmt;
 import soot.options.Options;
 import soot.util.Chain;
 
-public class StaticProfiler extends SceneTransformer {
-	Map<String, Integer> methodToCounter;
-	Map<String, Integer> methodToLoopCounter;
+public class StaticProfilerMethodCalls extends SceneTransformer {
+	private Map<String, Integer> methodToCounter;
+	
 
-	public StaticProfiler() {
+	public StaticProfilerMethodCalls() {
 		methodToCounter = new HashMap<String, Integer>();
-		methodToLoopCounter = new HashMap<String, Integer>();
 	}
 
 	@Override
@@ -59,7 +58,7 @@ public class StaticProfiler extends SceneTransformer {
 	 */
 	public Map<String, Integer> getMethodToCounter() {
 		return methodToCounter;
-	}
+	}	
 
 	/**
 	 *  SootMethod is a Soot representation of a method in Java it contains all 

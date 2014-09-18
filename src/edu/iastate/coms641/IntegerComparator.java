@@ -4,7 +4,7 @@ import java.util.Comparator;
 import java.util.Map;
 
 public class IntegerComparator implements Comparator<String> {
-	Map<String, Integer> base;
+	private Map<String, Integer> base;
 	
 	public IntegerComparator(Map<String, Integer> base) {
 		this.base = base;
