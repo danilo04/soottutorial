@@ -24,16 +24,17 @@ public class MethodCounter {
 		Map<String, Integer> sortedMethodToCounter = new TreeMap<String, Integer>(comparator);
 		sortedMethodToCounter.putAll(counter);
   		
-		String tableFormat = "| %-" + maxLength + "s | %-6d |%n";
-		String repeated = String.format(String.format("%%0%dd", maxLength + 5), 0).replace("0","-");
-		String spaces = String.format(String.format("%%0%dd", maxLength > 17 ? maxLength - 17 : 0), 0).replace("0"," ");
-		System.out.format("+" + repeated + "+--------+%n");
-		System.out.printf("| Method Signature" + spaces + "| # calls   |%n");
-		System.out.format("+" + repeated + "+--------+%n");
+		String tableFormat = "| %-" + (maxLength) + "s | %-11d |%n";
+		String repeated = String.format(String.format("%%0%dd", maxLength + 2), 0).replace("0","-");
+		String spaces = String.format(String.format("%%0%dd", maxLength > 17 ? maxLength - 15 : 0), 0).replace("0"," ");
+		System.out.format("+" + repeated + "+-------------+%n");
+		System.out.printf("| Method Signature" + spaces + "| # calls     |%n");
+		System.out.format("+" + repeated + "+-------------+%n");
 		for (Map.Entry<String, Integer> method : 
 			sortedMethodToCounter.entrySet()) {
 			System.out.format(tableFormat, method.getKey(), method.getValue());
 		}
+		System.out.format("+" + repeated + "+-------------+%n");
 		
 		System.out.println("Total number of methods: " + counter.size());
 	}
