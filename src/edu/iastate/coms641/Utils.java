@@ -1,25 +1,57 @@
 package edu.iastate.coms641;
 
+import java.util.Comparator;
 import java.util.Map;
-
-import dnl.utils.text.table.TextTable;
+import java.util.TreeMap;
 
 public class Utils {
 	public static void reportCounter(Map<String, Integer> counter) {
-		String[] columns = {
-				"Method Signature", "# of calls"
-		};
-		Object[][] data = new Object[counter.size()][2];
-		int c = 0;
-		for (Map.Entry<String, Integer> entry : counter.entrySet()) {
-			data[c][0] = entry.getKey();
-			data[c][1] = entry.getValue();
-			c += 1;
+		int maxLength = computeMaxLength(counter);
+		IntegerComparator comparator = new IntegerComparator(counter);
+		Map<String, Integer> sortedMethodToCounter = new TreeMap<String, Integer>(comparator);
+		sortedMethodToCounter.putAll(counter);
+  		
+		String tableFormat = "| %-" + (maxLength) + "s | %-11d |%n";
+		String repeated = String.format(String.format("%%0%dd", maxLength + 2), 0).replace("0","-");
+		String spaces = String.format(String.format("%%0%dd", maxLength > 17 ? maxLength - 15 : 0), 0).replace("0"," ");
+		System.out.format("+" + repeated + "+-------------+%n");
+		System.out.printf("| Method Signature" + spaces + "| # calls     |%n");
+		System.out.format("+" + repeated + "+-------------+%n");
+		for (Map.Entry<String, Integer> method : 
+			sortedMethodToCounter.entrySet()) {
+			System.out.format(tableFormat, method.getKey(), method.getValue());
+		}
+		System.out.format("+" + repeated + "+-------------+%n");
+		
+		System.out.println("Total number of methods: " + counter.size());
+	}
+
+	private static int computeMaxLength(Map<String, Integer> counter) {
+		int maxLength = 0;
+		for (String sig : counter.keySet()) {
+			if (sig.length() > maxLength) {
+				maxLength = sig.length();
+			}
 		}
 		
-		TextTable tt = new TextTable(columns, data);
-		tt.setAddRowNumbering(true);
-		tt.setSort(1);
-		tt.printTable();
+		return maxLength;
+	}
+	
+	static class IntegerComparator implements Comparator<String> {
+		private Map<String, Integer> base;
+		
+		public IntegerComparator(Map<String, Integer> base) {
+			this.base = base;
+		}
+		
+		@Override
+		public int compare(String o1, String o2) {
+			if (base.get(o1) >= base.get(o2)) {
+				return -1;
+			}
+			
+			return 1;
+		}
+
 	}
 }
