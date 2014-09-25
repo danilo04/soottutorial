@@ -11,17 +11,23 @@ import soot.SceneTransformer;
 import soot.SootClass;
 import soot.SootMethod;
 import soot.Unit;
+import soot.jimple.IfStmt;
 import soot.jimple.InvokeExpr;
 import soot.jimple.Stmt;
+import soot.jimple.SwitchStmt;
 import soot.options.Options;
 import soot.util.Chain;
 
-public class StaticProfilerMethodCalls extends SceneTransformer {
+public class StaticProfiler extends SceneTransformer {
 	private Map<String, Integer> methodToCounter;
+	private int noClasses;
+	private int noConditions;
 	
 
-	public StaticProfilerMethodCalls() {
+	public StaticProfiler() {
 		methodToCounter = new HashMap<String, Integer>();
+		noClasses = 0;
+		noConditions = 0;
 	}
 
 	@Override
@@ -43,6 +49,7 @@ public class StaticProfilerMethodCalls extends SceneTransformer {
 			// SootClass is a Soot representation of a class 
 			// it contains methods, fields, static fields
 			SootClass clazz = clazzes.next();
+			noClasses += 1;
 			
 			// get all the methods defined in the class
 			Iterator<SootMethod> methods = clazz.getMethods().iterator();
@@ -59,6 +66,20 @@ public class StaticProfilerMethodCalls extends SceneTransformer {
 	public Map<String, Integer> getMethodToCounter() {
 		return methodToCounter;
 	}	
+	
+	/**
+	 * Return the number of classes in the application
+	 */
+	public int getNoClasses() {
+		return noClasses;
+	}
+
+	/**
+	 * Return the number of conditions in the applications
+	 */
+	public int getNoConditions() {
+		return noConditions;
+	}
 
 	/**
 	 *  SootMethod is a Soot representation of a method in Java it contains all 
@@ -82,20 +103,32 @@ public class StaticProfilerMethodCalls extends SceneTransformer {
 				// remember we are using Jimple code not Java code
 				Stmt stmt = (Stmt) unit;
 				// check is the statement has an invocation
-				if (stmt.containsInvokeExpr()) {
-					InvokeExpr expr = stmt.getInvokeExpr();
-					SootMethod methodInvoked = expr.getMethod();
-					// a signature is the combination of class name 
-					// and method name
-					String sig = methodInvoked.getDeclaringClass().getName() +
-								"." + methodInvoked.getName(); 
-					
-					updateSigCounter(sig);
+				updateInvocation(stmt);
+				//check for conditions
+				if (isCondition(stmt)) {
+					noConditions += 1;
 				}
 			}
 		} catch (Exception e) {
 			G.v().out.println("An error has occurred analyzing method " + 
 								method.getName());
+		}
+	}
+
+	private boolean isCondition(Stmt stmt) {
+		return  stmt instanceof IfStmt || stmt instanceof SwitchStmt;
+	}
+
+	private void updateInvocation(Stmt stmt) {
+		if (stmt.containsInvokeExpr()) {
+			InvokeExpr expr = stmt.getInvokeExpr();
+			SootMethod methodInvoked = expr.getMethod();
+			// a signature is the combination of class name 
+			// and method name
+			String sig = methodInvoked.getDeclaringClass().getName() +
+						"." + methodInvoked.getName(); 
+			
+			updateSigCounter(sig);
 		}
 	}
 
